@@ -1,0 +1,2 @@
+Key codes for "The 2023 Canadian heat-drought enhances net forest CO2 uptake via reduced respiration". It contains the codes for processing data, fitting the relationship between TER and airtemperature, RZSM and GPP, and drawing the maps. All the codes can be opened with MATLAB 2024a software.
+In addition, attached files contain the the NEE data from GCASv2 inversions, wildfire emissions and GPP data，which can be download and used to run the code above in MATLAB.
