@@ -7,28 +7,33 @@ forest_mask=importdata("E:\phd_file\Boreal_North_America\region_lu.tif");
 forest_mask(forest_mask~=1)=nan;
 pixel_mask=pixel_mask.*forest_mask;
 
-% 创建环境
-data=geotiffread('E:\phd_file\Boreal_North_America\region_lu.tif');
-info=geotiffinfo('E:\phd_file\Boreal_North_America\region_lu.tif');
-[m,n] = size(data);
-k=1;
+% Create environment
+data = geotiffread('E:\phd_file\Boreal_North_America\region_lu.tif');
+info = geotiffinfo('E:\phd_file\Boreal_North_America\region_lu.tif');
+[m, n] = size(data);
+
+% Extract latitude coordinates from the first column
+k = 1;
 for i = 1:m
     for j = 1:1
-        [lat,lon]= pix2latlon(info.RefMatrix, i, j);   %读取栅格数据第1列所有行的纬度；
-        lat_(k,:)=lat; %将纬度数据存储为1列；
-        k=k+1;
+        [lat, lon] = pix2latlon(info.RefMatrix, i, j);   % Read latitude for all rows in first column
+        lat_(k, :) = lat; % Store latitude data as a column
+        k = k + 1;
     end
 end
 
-k=1;
+% Extract longitude coordinates from the first row
+k = 1;
 for ii = 1:1
     for jj = 1:n
-        [lat,lon]= pix2latlon(info.RefMatrix, ii, jj);   %读取栅格数据第1行所有行的经度；
-        lon_(k,:)=lon;  %将经度数据存储为1列；
-        k=k+1;
+        [lat, lon] = pix2latlon(info.RefMatrix, ii, jj);   % Read longitude for all columns in first row
+        lon_(k, :) = lon;  % Store longitude data as a column
+        k = k + 1;
     end
 end
-[lon1,lat1]=meshgrid(lon_,lat_);
+
+% Create coordinate grids using meshgrid
+[lon1, lat1] = meshgrid(lon_, lat_);
 
 Boundry = shaperead("E:\phd_file\yuling_shiliang\countries.shp");
 bou_canX = [Boundry(:).X];
@@ -41,49 +46,49 @@ load TRENDY_variable.mat
 area_grid=importdata("E:\phd_file\Boreal_North_America\degree2meter.tif")*1000000.*pixel_mask;
 
 
-% 遍历每个文件计算ER NEP
+% calculate ER NEP
 for f = 1:size(annual_GPP_combined,5)
     for y = 1:size(annual_GPP_combined,4)
-        % 计算 ER (逐月)
+        % calculate ER (monthly)
         annual_ER_combined(:, :, :, y, f) = annual_ra_combined(:, :, :, y, f) + annual_rh_combined(:, :, :, y, f);
 
-        % 计算 NEP (逐月)
+        % calculate NEP (monthly)
         annual_NEP_combined(:, :, :, y, f) = annual_GPP_combined(:, :, :, y, f) - annual_ER_combined(:, :, :, y, f);
 
-        % 计算 ER (年度总量)
+        % calculate ER (annual)
         annual_ER_sum(:, :, y, f) = annual_ra_sum(:, :, y, f) + annual_rh_sum(:, :, y, f);
 
-        % 计算 NEP (年度总量)
+        % calculate NEP (annual)
         annual_NEP_sum(:, :, y, f) = annual_GPP_sum(:, :, y, f) - annual_ER_sum(:, :, y, f);
     end
 end
 
-% 逐年计算均值
+% calculate mean value
 for y = 1:size(annual_ER_sum,3)
-    % 计算 NEP 的均值
+    % /NEP
     mean_NEP(:, :, y) = nanmean(annual_NEP_sum(:, :, y, :), 4);
-    % 计算 ER 的均值
+    % ER
     mean_ER(:, :, y) = nanmean(annual_ER_sum(:, :, y, :), 4);
-    % 计算 GPP 的均值
+    %  GPP
     mean_GPP(:, :, y) = nanmean(annual_GPP_sum(:, :, y, :), 4);
-    % 计算 RZSM 的均值
+    % RZSM
     mean_RZSM(:, :, y) = nanmean(annual_mrso_sum(:, :, y, :), 4);
-    % 计算 TEM 的均值
+    % TEM
     mean_TEM(:, :, y) = nanmean(annual_tas_sum(:, :, y, :), 4);
 
 end
 
-% 计算总体空间异常
+% 
 mean_NEP_2023anomalies=mean_NEP(:,:,end)-nanmean(mean_NEP(:,:,1:end-1),3);
 mean_ER_2023anomalies=mean_ER(:,:,end)-nanmean(mean_ER(:,:,1:end-1),3);
 mean_GPP_2023anomalies=mean_GPP(:,:,end)-nanmean(mean_GPP(:,:,1:end-1),3);
 
-% 计算季节变化
-% 遍历每个文件
+% seasonal anomaly
+
 for f = 1:size(annual_ER_combined,5)
     for y = 1:size(annual_ER_combined,4)
-        % 提取当前年的数据
-        ER_year = annual_ER_combined(:, :, :, y, f); % 提取第 6-8 月的数据
+       
+        ER_year = annual_ER_combined(:, :, :, y, f); %  6-8 month
         GPP_year = annual_GPP_combined(:, :, :, y, f);
         NEP_year = annual_NEP_combined(:, :, :, y, f);
 
@@ -95,7 +100,7 @@ for f = 1:size(annual_ER_combined,5)
 
     end
 end
-% 计算季节异常
+% 
 for f=1:size(ER_month_list,3)
     ER_month_temp=ER_month_list(:,:,f);
     ER_month_2023anomaly(f,:)=ER_month_temp(end,:)-nanmean(ER_month_temp(1:end-1,:));
@@ -118,30 +123,30 @@ mean_GPP_month_2023anomaly_std=nanstd(GPP_month_2023anomaly);
 
 
 for y = 1:size(annual_ER_sum,3)
-    % NEP 总量
+    % NEP
     NEP_mean(1, y) = nansum(nansum(mean_NEP(:, :, y) .* area_grid))/(10^15);
-    % ER 总量
+    % ER
     ER_mean(1, y) = nansum(nansum(mean_ER(:, :, y) .* area_grid))/(10^15);
-    % GPP 总量
+    % GPP
     GPP_mean(1, y) = nansum(nansum(mean_GPP(:, :, y) .* area_grid))/(10^15);
 
-    % RZSM 总量
+    % RZSM
     RZSM_mean(1, y) = nansum(nansum(mean_RZSM(:, :, y).*area_grid))/(nansum(nansum(area_grid)));
-    % TEM 总量
+    % TEM
     TEM_mean(1, y) = nansum(nansum(mean_TEM(:, :, y).*area_grid))/(nansum(nansum(area_grid)));
 end
 
-% 遍历每个nc文件结果
+% 
 for f = 1:size(annual_ER_sum,4)
     for y = 1:size(annual_ER_sum,3)
-        % 提取每年的二维矩阵
+        % 
         NEP_yearly = annual_NEP_sum(:, :, y, f); % NEP
         ER_yearly = annual_ER_sum(:, :, y, f);   % ER
         GPP_yearly = annual_GPP_sum(:, :, y, f); % GPP
         TEM_yearly = annual_tas_sum(:, :, y, f); % TEM
         RZSM_yearly = annual_mrso_sum(:, :, y, f); % RZSM
 
-        % 加权求和：矩阵逐元素相乘并求和
+        % 
         total_NEP_list(f, y) = nansum(nansum(NEP_yearly .* area_grid))/(10^15);
         total_ER_list(f, y) = nansum(nansum(ER_yearly .* area_grid))/(10^15);
         total_GPP_list(f, y) = nansum(nansum(GPP_yearly .* area_grid))/(10^15);
@@ -589,3 +594,4 @@ end
 [rho,pval] = corrcoef(-GCAS_NEE_mean,NEP_mean)
 [rho,pval] = corrcoef(GCAS_ER_mean,ER_mean)
 [rho,pval] = corrcoef(GCAS_GPP_mean,GPP_mean)
+
