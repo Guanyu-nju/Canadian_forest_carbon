@@ -7,28 +7,33 @@ forest_mask=importdata("E:\phd_file\Boreal_North_America\region_lu.tif");
 forest_mask(forest_mask~=1)=nan;
 pixel_mask=pixel_mask.*forest_mask;
 
-% 创建环境
-data=geotiffread('E:\phd_file\Boreal_North_America\region_lu.tif');
-info=geotiffinfo('E:\phd_file\Boreal_North_America\region_lu.tif');
-[m,n] = size(data);
-k=1;
+% Create environment
+data = geotiffread('E:\phd_file\Boreal_North_America\region_lu.tif');
+info = geotiffinfo('E:\phd_file\Boreal_North_America\region_lu.tif');
+[m, n] = size(data);
+
+% Extract latitude coordinates from the first column
+k = 1;
 for i = 1:m
     for j = 1:1
-        [lat,lon]= pix2latlon(info.RefMatrix, i, j);   %读取栅格数据第1列所有行的纬度；
-        lat_(k,:)=lat; %将纬度数据存储为1列；
-        k=k+1;
+        [lat, lon] = pix2latlon(info.RefMatrix, i, j);   % Read latitude for all rows in first column
+        lat_(k, :) = lat; % Store latitude data as a column
+        k = k + 1;
     end
 end
 
-k=1;
+% Extract longitude coordinates from the first row
+k = 1;
 for ii = 1:1
     for jj = 1:n
-        [lat,lon]= pix2latlon(info.RefMatrix, ii, jj);   %读取栅格数据第1行所有行的经度；
-        lon_(k,:)=lon;  %将经度数据存储为1列；
-        k=k+1;
+        [lat, lon] = pix2latlon(info.RefMatrix, ii, jj);   % Read longitude for all columns in first row
+        lon_(k, :) = lon;  % Store longitude data as a column
+        k = k + 1;
     end
 end
-[lon1,lat1]=meshgrid(lon_,lat_);
+
+% Create coordinate grids using meshgrid
+[lon1, lat1] = meshgrid(lon_, lat_);
 
 Boundry = shaperead("E:\phd_file\yuling_shiliang\countries.shp");
 bou_canX = [Boundry(:).X];
@@ -289,7 +294,7 @@ GCB_NEP_2023Anomaly=-GCB_NEE2023+GCB_NEE_mean;
 GCB_ER_2023Anomaly=GCB_ER2023-GCB_ER_mean;
 %% GCB2024
 
-% 时间序列均值
+% 
 for month=1:12
 
 
@@ -347,7 +352,7 @@ for month=1:12
 
 end
 
-% 2023年数据
+% 2023
 for month=1:12
 
 
@@ -416,7 +421,7 @@ GCB_landflux_anomaly_std=std(GCB_landflux_anomaly);
 Fire_anomaly=Fire_2023-nanmean(Fire_list);
 GCB_NEP_anomaly_std=sqrt(power(Fire_anomaly*0.2,2)+power(GCB_landflux_anomaly_std,2));
 
-% GPP距平均值
+% GPP
 GPP_anomaly_mean=GPP_2023-nanmean(GPP_list);
 for i=1:size(GPP_std_list,3)
 
@@ -431,7 +436,7 @@ for i=1:length(GPP_anomaly_std)
 end
 GPP_anomaly_std=GPP_std;
 
-% ER距平均值与标准差
+% ER
 GCB_ER_anomaly_mean=GCB_ER_2023-nanmean(GCB_ER_list);
 GCB_ER_anomaly_std=sqrt(power(Fire_anomaly*0.2,2)+power(GCB_landflux_anomaly_std,2)+power(GPP_anomaly_std,2));
 %%
@@ -448,7 +453,7 @@ b(1).CData = [193,229,193]/255;
 b(2).CData = [147,199,163]/255;
 b(3).CData = [127,160,139]/255;
 
-% %分组误差棒
+% 
 [M,N]=size([-GCAS_landflux_2023,-GCB_satellite_landflux_2023,-GCB_obspack_landflux_2023;...
     -GCAS_Mean_fire_NEE_2023mean,-GCB_satellite_Mean_fire_NEE_2023mean,-GCB_obspack_Mean_fire_NEE_2023mean;...
     GCAS_ER_2023,GCB_satellite_ER_2023,GCB_obspack_ER_2023]);
@@ -485,7 +490,7 @@ b(1).CData = [193,229,193]/255;
 b(2).CData = [147,199,163]/255;
 b(3).CData = [127,160,139]/255;
 
-% %分组误差棒
+%
 [M,N]=size([-GCAS_landflux_2023anomaly_mean,-GCB_satellite_landflux_2023anomaly_mean,-GCB_obspack_landflux_2023anomaly_mean;...
     -GCAS_Mean_fire_NEE_2023anomaly_mean,-GCB_satellite_Mean_fire_NEE_2023anomaly_mean,-GCB_obspack_Mean_fire_NEE_2023anomaly_mean;...
     GCAS_ER_2023anomaly,GCB_satellite_ER_2023anomaly,GCB_obspack_ER_2023anomaly]);
@@ -515,12 +520,12 @@ ylabel('PgC','FontName','Arial','FontSize',14)
 
 n2=nexttile
 m_proj('lambert','long',[-150 -50],'lat',[41 75]);
-m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on% 填充矢量边界
+m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on
 % m_coast('patch',[.7 .7 .7],'edgecolor','none','linewidth',0.7); hold on
 m_pcolor(lon1,lat1,GCB_NEP_2023Anomaly,'linestyle','none');
-% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');% 填充矢量边界
+% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');
 m_grid('tickdir','in','FontName','Arial','xtick',[-150:30:-40],'ytick',[45:10:65],...
-    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]); %对齐格网
+    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]);
 c = redblue();
 colormap(n2,nclCM(399));
 
@@ -532,12 +537,12 @@ text('string','c','Units','normalized','position',[-0.155950217182262 1.15711095
 
 n6=nexttile
 m_proj('lambert','long',[-150 -50],'lat',[41 75]);
-m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on% 填充矢量边界
+m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on
 % m_coast('patch',[.7 .7 .7],'edgecolor','none','linewidth',0.7); hold on
 m_pcolor(lon1,lat1,GCB_ER_2023Anomaly,'linestyle','none');
-% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');% 填充矢量边界
+% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');
 m_grid('tickdir','in','FontName','Arial','xtick',[-150:30:-40],'ytick',[45:10:65],...
-    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]); %对齐格网
+    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]);
 colormap(n6,flipud(nclCM(399)));
 
 caxis([-120,120]);
@@ -574,4 +579,5 @@ title('Monthly flux anomalies (GCB2024-{\itin-situ})','FontName','Arial','FontSi
 
 set(gcf,'unit','pixels','position',[540,96,1202,1055]);
 result=['E:\phd_file\Boreal_North_America\Result\V9\GCB2024_obspack_NEE_bar.png']
+
 % print(result,ff,'-r600','-dpng' );
