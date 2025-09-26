@@ -7,28 +7,33 @@ forest_mask=importdata("E:\phd_file\Boreal_North_America\region_lu.tif");
 forest_mask(forest_mask~=1)=nan;
 pixel_mask=pixel_mask.*forest_mask;
 
-% 创建环境
-data=geotiffread('E:\phd_file\Boreal_North_America\region_lu.tif');
-info=geotiffinfo('E:\phd_file\Boreal_North_America\region_lu.tif');
-[m,n] = size(data);
-k=1;
+% Create environment
+data = geotiffread('E:\phd_file\Boreal_North_America\region_lu.tif');
+info = geotiffinfo('E:\phd_file\Boreal_North_America\region_lu.tif');
+[m, n] = size(data);
+
+% Extract latitude coordinates from the first column
+k = 1;
 for i = 1:m
     for j = 1:1
-        [lat,lon]= pix2latlon(info.RefMatrix, i, j);   %读取栅格数据第1列所有行的纬度；
-        lat_(k,:)=lat; %将纬度数据存储为1列；
-        k=k+1;
+        [lat, lon] = pix2latlon(info.RefMatrix, i, j);   % Read latitude for all rows in first column
+        lat_(k, :) = lat; % Store latitude data as a column
+        k = k + 1;
     end
 end
 
-k=1;
+% Extract longitude coordinates from the first row
+k = 1;
 for ii = 1:1
     for jj = 1:n
-        [lat,lon]= pix2latlon(info.RefMatrix, ii, jj);   %读取栅格数据第1行所有行的经度；
-        lon_(k,:)=lon;  %将经度数据存储为1列；
-        k=k+1;
+        [lat, lon] = pix2latlon(info.RefMatrix, ii, jj);   % Read longitude for all columns in first row
+        lon_(k, :) = lon;  % Store longitude data as a column
+        k = k + 1;
     end
 end
-[lon1,lat1]=meshgrid(lon_,lat_);
+
+% Create coordinate grids using meshgrid
+[lon1, lat1] = meshgrid(lon_, lat_);
 
 Boundry = shaperead("E:\phd_file\yuling_shiliang\countries.shp");
 bou_canX = [Boundry(:).X];
@@ -64,7 +69,7 @@ NEP_2023Anomaly=-NEE2023+NEE_mean;
 GPP_2023Anomaly=GPP2023-GPP_mean;
 ER_2023Anomaly=ER2023-ER_mean;
 %%
-% % 面积占比
+% % area ratio
 % count_sum=sum(sum(~isnan(GCB_NEP_2023Anomaly)));
 % count1=sum(sum(GCB_NEP_2023Anomaly>0));
 % result=count1/(count_sum)
@@ -91,14 +96,14 @@ GCB_ER2023=importdata("E:\phd_file\Boreal_North_America\GCB2024\ER\satellite_plu
 GCB_NEP_2023Anomaly=-GCB_NEE2023+GCB_NEE_mean;
 GCB_ER_2023Anomaly=GCB_ER2023-GCB_ER_mean;
 %%
-% 面积占比
+
 count_sum=sum(sum(~isnan(GCB_NEP_2023Anomaly)));
 count1=sum(sum(GCB_NEP_2023Anomaly>0));
 result=count1/(count_sum)
 %% GCAS
 area_grid=importdata("E:\phd_file\Boreal_North_America\degree2meter.tif")*1000000.*pixel_mask;
 
-% 时间序列均值
+
 for month=1:12
 
 
@@ -144,7 +149,7 @@ for month=1:12
     end
 
 end
-% 2023年数据
+% 2023 data list
 for month=1:12
 
 
@@ -240,7 +245,7 @@ for i=1:length(GPP_anomaly_std)
 end
 GPP_anomaly_std=GPP_std;
 
-% ER距平均值与标准差
+
 ER_anomaly_mean=GCAS_ER_2023-nanmean(ER_list);
 spring_ER_anomaly_mean=nansum(ER_anomaly_mean(3:5));
 summer_ER_anomaly_mean=nansum(ER_anomaly_mean(6:8));
@@ -256,7 +261,7 @@ anomaly_std_list=[spring_GPP_anomaly_std,spring_ER_std,spring_NEP_anomaly_std;su
     autumn_GPP_anomaly_std,autumn_ER_std,autumn_NEP_anomaly_std];
 %% GCB2024
 
-% 时间序列均值
+
 for month=1:12
 
 
@@ -297,7 +302,7 @@ for month=1:12
 
 end
 
-% 2023年数据
+
 for month=1:12
 
 
@@ -352,7 +357,7 @@ spring_GCB_NEP_anomaly_std=sqrt(power(spring_Fire_anomaly_mean*0.2,2)+power(spri
 summer_GCB_NEP_anomaly_std=sqrt(power(summer_Fire_anomaly_mean*0.2,2)+power(summer_GCB_landflux_anomaly_std,2));
 autumn_GCB_NEP_anomaly_std=sqrt(power(autumn_Fire_anomaly_mean*0.2,2)+power(autumn_GCB_landflux_anomaly_std,2));
 
-% ER距平均值与标准差
+% ER
 GCB_ER_anomaly_mean=GCB_ER_2023-nanmean(GCB_ER_list);
 spring_GCB_ER_anomaly_mean=nansum(GCB_ER_anomaly_mean(3:5));
 summer_GCB_ER_anomaly_mean=nansum(GCB_ER_anomaly_mean(6:8));
@@ -386,7 +391,6 @@ end
 kNDVI_mean=nanmean(kNDVI_mean,3);
 kNDVI_2023Anomaly=kNDVI2023-kNDVI_mean;
 
-% 时间序列均值
 for month=1:12
 
 
@@ -397,7 +401,6 @@ for month=1:12
 
 end
 
-% 2023年数据
 for month=1:12
     year=2023;
     kNDVI_2023_temp=importdata(['E:\phd_file\Boreal_North_America\kNDVI\month\globe\kNDVI_' num2str(year) '_' num2str(month) '.tif']);
@@ -419,7 +422,6 @@ end
 SIF_mean=nanmean(SIF_mean,3);
 SIF_2023Anomaly=SIF2023-SIF_mean;
 
-% 时间序列均值
 for month=1:12
 
 
@@ -430,7 +432,6 @@ for month=1:12
 
 end
 
-% 2023年数据
 for month=1:12
     year=2023;
     SIF_2023_temp=importdata(['E:\phd_file\Boreal_North_America\SIF\TROPOMI\month\1degree\SIF_' num2str(year) '_' num2str(month) '.tif']);
@@ -449,12 +450,12 @@ t.Padding = 'compact';
 % part 1 *********************************************************************************
 n2=nexttile
 m_proj('lambert','long',[-150 -50],'lat',[41 75]);
-m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on% 填充矢量边界
+m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on
 % m_coast('patch',[.7 .7 .7],'edgecolor','none','linewidth',0.7); hold on
 m_pcolor(lon1,lat1,NEP_2023Anomaly,'linestyle','none');
-% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');% 填充矢量边界
+% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');
 m_grid('tickdir','in','FontName','Arial','xtick',[-150:30:-40],'ytick',[45:10:65],...
-    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]); %对齐格网
+    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]);
 colormap(n2,nclCM(399));
 
 caxis([-120,120]);
@@ -466,12 +467,12 @@ text('string','a','Units','normalized','position',[-0.155950217182262 1.15711095
 % part 2 *********************************************************************************
 n2=nexttile
 m_proj('lambert','long',[-150 -50],'lat',[41 75]);
-m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on% 填充矢量边界
+m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on
 % m_coast('patch',[.7 .7 .7],'edgecolor','none','linewidth',0.7); hold on
 m_pcolor(lon1,lat1,GCB_NEP_2023Anomaly,'linestyle','none');
-% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');% 填充矢量边界
+% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');
 m_grid('tickdir','in','FontName','Arial','xtick',[-150:30:-40],'ytick',[45:10:65],...
-    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]); %对齐格网
+    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]);
 c = redblue();
 colormap(n2,nclCM(399));
 
@@ -485,12 +486,12 @@ text('string','b','Units','normalized','position',[-0.155950217182262 1.15711095
 % part 3 *********************************************************************************
 n4=nexttile
 m_proj('lambert','long',[-150 -50],'lat',[41 75]);
-m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on% 填充矢量边界
+m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on
 % m_coast('patch',[.7 .7 .7],'edgecolor','none','linewidth',0.7); hold on
 m_pcolor(lon1,lat1,GPP_2023Anomaly,'linestyle','none');
-% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');% 填充矢量边界
+% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');
 m_grid('tickdir','in','FontName','Arial','xtick',[-150:30:-40],'ytick',[45:10:65],...
-    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]); %对齐格网
+    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]);
 colormap(n4,nclCM(399));
 
 caxis([-120,120]);
@@ -502,12 +503,12 @@ text('string','c','Units','normalized','position',[-0.155950217182262 1.15711095
 % part 4 *********************************************************************************
 n6=nexttile
 m_proj('lambert','long',[-150 -50],'lat',[41 75]);
-m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on% 填充矢量边界
+m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on
 % m_coast('patch',[.7 .7 .7],'edgecolor','none','linewidth',0.7); hold on
 m_pcolor(lon1,lat1,ER_2023Anomaly,'linestyle','none');
-% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');% 填充矢量边界
+% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');
 m_grid('tickdir','in','FontName','Arial','xtick',[-150:30:-40],'ytick',[45:10:65],...
-    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]); %对齐格网
+    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]);
 colormap(n6,flipud(nclCM(399)));
 
 caxis([-120,120]);
@@ -519,12 +520,12 @@ text('string','d','Units','normalized','position',[-0.155950217182262 1.15711095
 % part 5 *********************************************************************************
 n6=nexttile
 m_proj('lambert','long',[-150 -50],'lat',[41 75]);
-m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on% 填充矢量边界
+m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on
 % m_coast('patch',[.7 .7 .7],'edgecolor','none','linewidth',0.7); hold on
 m_pcolor(lon1,lat1,GCB_ER_2023Anomaly,'linestyle','none');
-% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');% 填充矢量边界
+% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');
 m_grid('tickdir','in','FontName','Arial','xtick',[-150:30:-40],'ytick',[45:10:65],...
-    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]); %对齐格网
+    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]);
 colormap(n6,flipud(nclCM(399)));
 
 caxis([-120,120]);
@@ -536,12 +537,12 @@ text('string','e','Units','normalized','position',[-0.155950217182262 1.15711095
 % part 6 *********************************************************************************
 n7=nexttile
 m_proj('lambert','long',[-150 -50],'lat',[41 75]);
-m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on% 填充矢量边界
+m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on
 % m_coast('patch',[.7 .7 .7],'edgecolor','none','linewidth',0.7); hold on
 m_pcolor(lon1,lat1,kNDVI_2023Anomaly,'linestyle','none');
-% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');% 填充矢量边界
+% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');
 m_grid('tickdir','in','FontName','Arial','xtick',[-150:30:-40],'ytick',[45:10:65],...
-    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]); %对齐格网
+    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]);
 colormap(n7,nclCM(399));
 
 caxis([-0.06,0.06]);
@@ -560,7 +561,7 @@ b(3).CData = [200,184,147]/255;
 b(4).CData = [120,149,203]/255;
 b(5).CData = [184,128,197]/255;
 
-% %分组误差棒
+
 [M,N]=size(Total_anomaly_list);
 for i=1:N
     xx(:,i)=b(i).XEndPoints';
@@ -610,12 +611,12 @@ xlabel('Month','FontName','Arial','FontSize',14)
 % part 9 *********************************************************************************
 n9=nexttile
 m_proj('lambert','long',[-150 -50],'lat',[41 75]);
-m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on% 填充矢量边界
+m_patch(bou_canX,bou_canY,[190 190 190]/255,'linewidth',0.5); hold on
 % m_coast('patch',[.7 .7 .7],'edgecolor','none','linewidth',0.7); hold on
 m_pcolor(lon1,lat1,SIF_2023Anomaly,'linestyle','none');
-% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');% 填充矢量边界
+% m_plot(bou_canX,bou_canY,'linewidth',0.1,'color','k');
 m_grid('tickdir','in','FontName','Arial','xtick',[-150:30:-40],'ytick',[45:10:65],...
-    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]); %对齐格网
+    'linewidth',0.7,'xaxisloc','bottom','yaxisloc','left','FontSize',14,'xticklabels',[-160:30:-40],'yticklabels',[45:10:65]);
 colormap(n9,nclCM(399));
 
 caxis([-0.08,0.08]);
@@ -627,3 +628,4 @@ text('string','i','Units','normalized','position',[-0.160574295917181 1.08988406
 set(gcf,'unit','centimeters','position',[10.054166666666667,8.128,45.825833333333335,24.510999999999996]);
 result=['E:\phd_file\Boreal_North_America\Result\V9\Flux_anomaly2023_summer_map.png']
 % print(result,f,'-r600','-dpng');
+
