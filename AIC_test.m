@@ -1,34 +1,33 @@
-% 示例数据
+% Sample data
 x = TEM_summer_list(:);
-y = GCAS_ER_summer_list(:); % 线性关系加噪声
+y = GCAS_ER_summer_list(:); % Linear relationship with noise
 
-
-% 线性拟合
+% Linear fitting (1st degree polynomial)
 p1 = polyfit(x, y, 1);
 y1 = polyval(p1, x);
 residuals1 = y - y1;
-SSE1 = sum(residuals1.^2);
+SSE1 = sum(residuals1.^2);  % Sum of squared errors
 
-% 二次多项式拟合
+% Quadratic polynomial fitting (2nd degree polynomial)
 p2 = polyfit(x, y, 2);
 y2 = polyval(p2, x);
 residuals2 = y - y2;
-SSE2 = sum(residuals2.^2);
+SSE2 = sum(residuals2.^2);  % Sum of squared errors
 
-% 计算 AIC
-n = length(y);
-k1 = length(p1);
-k2 = length(p2);
-AIC1 = n * log(SSE1/n) + 2 * k1;
-AIC2 = n * log(SSE2/n) + 2 * k2;
+% Calculate AIC (Akaike Information Criterion)
+n = length(y);  % Number of data points
+k1 = length(p1);  % Number of parameters in linear model (2 parameters: slope and intercept)
+k2 = length(p2);  % Number of parameters in quadratic model (3 parameters)
+AIC1 = n * log(SSE1/n) + 2 * k1;  % AIC for linear model
+AIC2 = n * log(SSE2/n) + 2 * k2;  % AIC for quadratic model
 
-% 输出结果
-fprintf('线性拟合的 AIC: %.4f\n', AIC1);
-fprintf('二次多项式拟合的 AIC: %.4f\n', AIC2);
+% Output results
+fprintf('AIC for linear fitting: %.4f\n', AIC1);
+fprintf('AIC for quadratic polynomial fitting: %.4f\n', AIC2);
 
-% 比较 AIC
+% Compare AIC values (lower AIC indicates better model)
 if AIC1 < AIC2
-    disp('线性拟合更好');
+    disp('Linear fitting is better');
 else
-    disp('二次多项式拟合更好');
+    disp('Quadratic polynomial fitting is better');
 end
