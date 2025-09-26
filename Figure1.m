@@ -7,28 +7,33 @@ forest_mask=importdata("E:\phd_file\Boreal_North_America\region_lu.tif");
 forest_mask(forest_mask~=1)=nan;
 pixel_mask=pixel_mask.*forest_mask;
 
-% 创建环境
-data=geotiffread('E:\phd_file\Boreal_North_America\region_lu.tif');
-info=geotiffinfo('E:\phd_file\Boreal_North_America\region_lu.tif');
-[m,n] = size(data);
-k=1;
+% Create environment
+data = geotiffread('E:\phd_file\Boreal_North_America\region_lu.tif');
+info = geotiffinfo('E:\phd_file\Boreal_North_America\region_lu.tif');
+[m, n] = size(data);
+
+% Extract latitude coordinates from the first column
+k = 1;
 for i = 1:m
     for j = 1:1
-        [lat,lon]= pix2latlon(info.RefMatrix, i, j);   %读取栅格数据第1列所有行的纬度；
-        lat_(k,:)=lat; %将纬度数据存储为1列；
-        k=k+1;
+        [lat, lon] = pix2latlon(info.RefMatrix, i, j);   % Read latitude for all rows in first column
+        lat_(k, :) = lat; % Store latitude data as a column
+        k = k + 1;
     end
 end
 
-k=1;
+% Extract longitude coordinates from the first row
+k = 1;
 for ii = 1:1
     for jj = 1:n
-        [lat,lon]= pix2latlon(info.RefMatrix, ii, jj);   %读取栅格数据第1行所有行的经度；
-        lon_(k,:)=lon;  %将经度数据存储为1列；
-        k=k+1;
+        [lat, lon] = pix2latlon(info.RefMatrix, ii, jj);   % Read longitude for all columns in first row
+        lon_(k, :) = lon;  % Store longitude data as a column
+        k = k + 1;
     end
 end
-[lon1,lat1]=meshgrid(lon_,lat_);
+
+% Create coordinate grids using meshgrid
+[lon1, lat1] = meshgrid(lon_, lat_);
 
 Boundry = shaperead("E:\phd_file\yuling_shiliang\countries.shp");
 bou_canX = [Boundry(:).X];
@@ -564,3 +569,4 @@ colormap(e,flipud(nclCM(463)))
 % set(gcf,'unit','centimeters','position',[14.605000000000002,6.2865,34.798,20.277666666666672]);
 result=['E:\phd_file\Boreal_North_America\Result\V9\Fire_NEE_bar2.png']
 % print(result,ff,'-r600','-dpng' );
+
