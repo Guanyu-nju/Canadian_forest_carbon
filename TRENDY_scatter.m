@@ -7,28 +7,33 @@ forest_mask=importdata("E:\phd_file\Boreal_North_America\region_lu.tif");
 forest_mask(forest_mask~=1)=nan;
 pixel_mask=pixel_mask.*forest_mask;
 
-% 创建环境
-data=geotiffread('E:\phd_file\Boreal_North_America\region_lu.tif');
-info=geotiffinfo('E:\phd_file\Boreal_North_America\region_lu.tif');
-[m,n] = size(data);
-k=1;
+% Create environment
+data = geotiffread('E:\phd_file\Boreal_North_America\region_lu.tif');
+info = geotiffinfo('E:\phd_file\Boreal_North_America\region_lu.tif');
+[m, n] = size(data);
+
+% Extract latitude coordinates from the first column
+k = 1;
 for i = 1:m
     for j = 1:1
-        [lat,lon]= pix2latlon(info.RefMatrix, i, j);   %读取栅格数据第1列所有行的纬度；
-        lat_(k,:)=lat; %将纬度数据存储为1列；
-        k=k+1;
+        [lat, lon] = pix2latlon(info.RefMatrix, i, j);   % Read latitude for all rows in first column
+        lat_(k, :) = lat; % Store latitude data as a column
+        k = k + 1;
     end
 end
 
-k=1;
+% Extract longitude coordinates from the first row
+k = 1;
 for ii = 1:1
     for jj = 1:n
-        [lat,lon]= pix2latlon(info.RefMatrix, ii, jj);   %读取栅格数据第1行所有行的经度；
-        lon_(k,:)=lon;  %将经度数据存储为1列；
-        k=k+1;
+        [lat, lon] = pix2latlon(info.RefMatrix, ii, jj);   % Read longitude for all columns in first row
+        lon_(k, :) = lon;  % Store longitude data as a column
+        k = k + 1;
     end
 end
-[lon1,lat1]=meshgrid(lon_,lat_);
+
+% Create coordinate grids using meshgrid
+[lon1, lat1] = meshgrid(lon_, lat_);
 
 Boundry = shaperead("E:\phd_file\yuling_shiliang\countries.shp");
 bou_canX = [Boundry(:).X];
@@ -40,7 +45,7 @@ load TRENDY_variable.mat
 
 area_grid=importdata("E:\phd_file\Boreal_North_America\degree2meter.tif")*1000000.*pixel_mask;
 
-% 遍历每个文件计算ER NEP
+% calculate ER NEP
 for f = 1:size(annual_GPP_combined,5)
     for y = 1:size(annual_GPP_combined,4)
         % 计算 ER (逐月)
@@ -48,20 +53,20 @@ for f = 1:size(annual_GPP_combined,5)
     end
 end
 
-% 遍历每个文件
+% 
 for f = 1:size(annual_ER_combined,5)
     for y = 1:size(annual_ER_combined,4)
-        % 提取当前年的夏季数据 (6-8月)
-        ER_summer = annual_ER_combined(:, :, 6:8, y, f); % 提取第 6-8 月的数据
+        % derive summer data (6-8月)
+        ER_summer = annual_ER_combined(:, :, 6:8, y, f);
         ER_summer=sum(ER_summer,3);
-        GPP_summer = annual_GPP_combined(:, :, 6:8, y, f); % 提取第 6-8 月的数据
+        GPP_summer = annual_GPP_combined(:, :, 6:8, y, f); 
         GPP_summer=sum(GPP_summer,3);
-        mrso_summer = annual_mrso_combined(:, :, 6:8, y, f); % 提取第 6-8 月的数据
+        mrso_summer = annual_mrso_combined(:, :, 6:8, y, f);
         mrso_summer=nanmean(mrso_summer,3);
-        tas_summer = annual_tas_combined(:, :, 6:8, y, f); % 提取第 6-8 月的数据
+        tas_summer = annual_tas_combined(:, :, 6:8, y, f); 
         tas_summer=nanmean(tas_summer,3);
 
-        % 按面积加权求和，得到单个文件的夏季总量
+        %
         summer_ER_list(f, y) = nansum(nansum(ER_summer .* area_grid))/(nansum(nansum(area_grid)));
         summer_GPP_list(f, y) = nansum(nansum(GPP_summer .* area_grid))/(nansum(nansum(area_grid)));
         summer_mrso_list(f, y) = nansum(nansum(mrso_summer.*area_grid))/(nansum(nansum(area_grid)));
@@ -557,4 +562,5 @@ result=['E:\phd_file\Boreal_North_America\Result\V9\TRENDY_indiviual_scatter3.pn
 % set(gcf,'unit','centimeters','position',[26.431875000000005,13.599583333333335,21.16666666666667,19.129375000000003]);
 % result=['E:\phd_file\Boreal_North_America\Result\V9\TRENDY_CMIP6_scatter.png']
 % % print(result,ff,'-r600','-dpng' );
+
 
